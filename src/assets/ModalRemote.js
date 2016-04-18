@@ -242,10 +242,13 @@ function ModalRemote(modalId) {
             this.setFooter(response.footer);
 
         if ($(this.content).find("form")[0] !== undefined) {
-            this.setupFormSubmit(
-                $(this.content).find("form")[0],
-                $(this.footer).find('[type="submit"]')[0]
-            );
+            var that = this;
+            $(this.footer).find('[type="submit"]').each(function() {
+                that.setupFormSubmit(
+                    $(that.content).find("form")[0],
+                    $(this)
+                );
+            });
         }
     }
 
@@ -263,16 +266,23 @@ function ModalRemote(modalId) {
             var instance = this;
 
             // Submit form when user clicks submit button
-            $(modalFormSubmitBtn).click(function (e) {
+            $(modalFormSubmitBtn).on('click', function (e) {
                 var data;
 
                 // Test if browser supports FormData which handles uploads
                 if (window.FormData) {
                     data = new FormData($(modalForm)[0]);
+                    if ($(modalFormSubmitBtn).attr('name')) {
+                        data.append($(modalFormSubmitBtn).attr('name'), '1');
+                    }
                 } else {
                     // Fallback to serialize
                     data = $(modalForm).serializeArray();
+                    if ($(modalFormSubmitBtn).attr('name')) {
+                        data.push({name: $(modalFormSubmitBtn).attr('name'), value: '1'});
+                    }
                 }
+
 
                 instance.doRemote(
                     $(modalForm).attr('action'),
